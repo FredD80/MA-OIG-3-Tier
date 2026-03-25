@@ -74,7 +74,7 @@ resource "aws_kms_alias" "cloudtrail" {
 # S3 bucket for CloudTrail logs
 resource "aws_s3_bucket" "cloudtrail" {
   bucket        = "${var.name}-cloudtrail-${data.aws_caller_identity.current.account_id}"
-  force_destroy = false
+  force_destroy = true
   tags          = merge(var.tags, { Name = "${var.name}-cloudtrail-bucket" })
 }
 

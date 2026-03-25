@@ -1,9 +1,5 @@
-data "aws_availability_zones" "available" {
-  state = "available"
-}
-
 locals {
-  azs = slice(data.aws_availability_zones.available.names, 0, var.az_count)
+  azs = ["us-east-1a", "us-east-1c"]
 
   # "Variable-like" handle for this VPC and related commonly reused values
   vpc = {
@@ -157,7 +153,34 @@ resource "aws_kms_key" "flowlogs" {
   description             = "KMS key for VPC Flow Logs"
   deletion_window_in_days = 30
   enable_key_rotation     = true
-  tags                    = merge(var.tags, { Name = "${var.name}-kms-flowlogs" })
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "EnableRootAccess"
+        Effect    = "Allow"
+        Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root" }
+        Action    = "kms:*"
+        Resource  = "*"
+      },
+      {
+        Sid       = "AllowCloudWatchLogs"
+        Effect    = "Allow"
+        Principal = { Service = "logs.${var.aws_region}.amazonaws.com" }
+        Action = [
+          "kms:Encrypt*",
+          "kms:Decrypt*",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:DescribeKey"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = merge(var.tags, { Name = "${var.name}-kms-flowlogs" })
 }
 
 resource "aws_kms_alias" "flowlogs" {

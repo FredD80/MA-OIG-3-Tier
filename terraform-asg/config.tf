@@ -5,7 +5,7 @@
 # S3 bucket for Config snapshots & history
 resource "aws_s3_bucket" "config" {
   bucket        = "${var.name}-config-${data.aws_caller_identity.current.account_id}"
-  force_destroy = false
+  force_destroy = true
   tags          = merge(var.tags, { Name = "${var.name}-config-bucket" })
 }
 
@@ -163,7 +163,7 @@ resource "aws_config_delivery_channel" "main" {
     delivery_frequency = "Six_Hours"
   }
 
-  depends_on = [aws_config_configuration_recorder.main]
+  depends_on = [aws_config_configuration_recorder.main, aws_s3_bucket_policy.config]
 }
 
 resource "aws_config_configuration_recorder_status" "main" {

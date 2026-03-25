@@ -22,38 +22,77 @@ variable "az_count" {
   default     = 2
 }
 
-# --- App tier (ASG) ---
+# --- Web tier (ASG) ---
 variable "app_instance_type" {
   type        = string
-  description = "Instance type for app ASG"
+  description = "Instance type for web tier ASG"
   default     = "t3.micro"
 }
 
 variable "app_min_size" {
-  type    = number
-  default = 2
+  type        = number
+  description = "Web tier ASG minimum size"
+  default     = 2
 }
 
 variable "app_max_size" {
-  type    = number
-  default = 4
+  type        = number
+  description = "Web tier ASG maximum size"
+  default     = 2
 }
 
 variable "app_desired_capacity" {
-  type    = number
-  default = 2
+  type        = number
+  description = "Web tier ASG desired capacity"
+  default     = 2
 }
 
-# App will listen on port 80 in this baseline (simple nginx placeholder).
 variable "app_port" {
   type        = number
-  description = "App listen port on EC2 instances"
-  default     = 80
+  description = "Web tier listen port on EC2 instances (HTTPS)"
+  default     = 443
 }
 
 variable "app_health_path" {
   type        = string
-  description = "ALB health check path"
+  description = "Web ALB health check path"
+  default     = "/health"
+}
+
+# --- Logic tier (ASG) ---
+variable "logic_instance_type" {
+  type        = string
+  description = "Instance type for logic tier ASG"
+  default     = "t3.micro"
+}
+
+variable "logic_min_size" {
+  type        = number
+  description = "Logic tier ASG minimum size"
+  default     = 2
+}
+
+variable "logic_max_size" {
+  type        = number
+  description = "Logic tier ASG maximum size"
+  default     = 2
+}
+
+variable "logic_desired_capacity" {
+  type        = number
+  description = "Logic tier ASG desired capacity"
+  default     = 2
+}
+
+variable "logic_port" {
+  type        = number
+  description = "Logic tier listen port on EC2 instances (HTTPS)"
+  default     = 8443
+}
+
+variable "logic_health_path" {
+  type        = string
+  description = "Logic ALB health check path"
   default     = "/health"
 }
 
@@ -119,7 +158,12 @@ variable "tags" {
 # --- NIST 800-53 hardening ---
 variable "acm_certificate_arn" {
   type        = string
-  description = "ACM certificate ARN for HTTPS listener (SC-8). Leave empty to keep HTTP-only."
+  description = "ACM certificate ARN for the web ALB HTTPS listener (SC-8). Required."
+}
+
+variable "logic_acm_certificate_arn" {
+  type        = string
+  description = "ACM certificate ARN for the logic ALB HTTPS listener. Leave empty to reuse acm_certificate_arn (e.g. wildcard cert)."
   default     = ""
 }
 

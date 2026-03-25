@@ -81,11 +81,11 @@ resource "aws_security_group" "db" {
   vpc_id      = aws_vpc.this.id
 
   ingress {
-    description     = "Postgres from app SG"
+    description     = "Postgres from logic tier SG"
     from_port       = var.db_port
     to_port         = var.db_port
     protocol        = "tcp"
-    security_groups = [aws_security_group.app.id]
+    security_groups = [aws_security_group.logic.id]
   }
 
   # SC-7: Restrict egress to VPC only
@@ -193,9 +193,8 @@ resource "aws_db_instance" "postgres" {
   backup_window           = "03:00-04:00"
   maintenance_window      = "sun:05:00-sun:06:00"
 
-  deletion_protection       = true
-  skip_final_snapshot       = false
-  final_snapshot_identifier = "${var.name}-postgres-final"
+  deletion_protection = false
+  skip_final_snapshot = true
 
   auto_minor_version_upgrade = true
   apply_immediately          = false
